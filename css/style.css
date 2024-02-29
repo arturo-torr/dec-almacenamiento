@@ -435,3 +435,7 @@ textarea {
     color: white;
     transition: 0.5s;
 }
+
+.m-20percent {
+    margin: 20% 1%;
+}

@@ -1619,10 +1619,10 @@ class RestaurantsManagerView {
       this.initzone.insertAdjacentHTML(
         "afterbegin",
         `<div class="container my-3">
-					<div class="alert alert-warning" role="alert">
+					<div class="alert bg__grey text--green text-center m-20percent py-5" role="alert">
 						<strong>
 							Para utilizar esta web es necesario aceptar el uso de cookies.
-							Debe recargar la página y aceptar las condicones para seguir
+							Debe recargar la página y aceptar las condiciones para seguir
 							navegando. Gracias.
 						</strong>
 					</div>
