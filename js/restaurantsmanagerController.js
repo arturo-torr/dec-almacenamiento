@@ -8,6 +8,9 @@ import RestaurantsManager, {
   Coordinate,
 } from "./restaurantsmanager.js";
 
+// Importado de cookie
+import { getCookie } from "./utils.js";
+
 // Modelo y vista como constantes privadas
 const MODEL = Symbol("RestaurantsManagerModel");
 const VIEW = Symbol("RestaurantsManagerView");
@@ -262,6 +265,11 @@ class RestaurantsManagerController {
 
   // Funciones que solo se ejecutan una sola vez
   onLoad = () => {
+    // Busca si hemos aceptado el mensaje de cookies, es decir, hay una cookie creada
+    if (getCookie("acceptedCookieMessage") !== "true") {
+      this[VIEW].showCookiesMessage();
+    }
+
     this[LOAD_MANAGER_OBJECTS]();
     this.onAddCategory();
     this.onAddAllergen();

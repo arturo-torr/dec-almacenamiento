@@ -6,6 +6,8 @@ import {
   newUpdateAllergenValidation,
   newChangePositionsValidation,
 } from "./validation.js";
+
+import { setCookie } from "./utils.js";
 // Symbol dónde se introducirá la vista de RestaurantManager
 const EXECUTE_HANDLER = Symbol("executeHandler");
 
@@ -1551,6 +1553,93 @@ class RestaurantsManagerView {
     };
     messageModalContainer.addEventListener("hidden.bs.modal", listener, {
       once: true,
+    });
+  }
+
+  showCookiesMessage() {
+    const toast = `<div class="fixed-top p-5 mt-5">
+				<div
+					id="cookies-message"
+					class="toast fade show bg__grey border--green1 text-white w-50 mx-auto mw-100"
+					role="alert"
+					aria-live="assertive"
+					aria-atomic="true"
+				>
+					<div class="toast-header bg__grey border_bottom--green1">
+						<h4 class="me-auto text--green fw-bold my-auto">Aviso de uso de cookies</h4>
+            <button
+							type="button"
+							class="btn-close bg-danger"
+							data-bs-dismiss="toast"
+							aria-label="Close"
+							id="btnDismissCookie"
+						></button>
+					</div>
+					<div class="toast-body p-4 d-flex flex-column">
+						<p>
+							Este sitio web almacena datos en cookies para activar su
+							funcionalidad, entre las que se encuentra datos analíticos y
+							personalización. Para poder utilizar este sitio, estás
+							automáticamente aceptando que utilizamos cookies.
+						</p>
+						<div class="ml-auto">
+							<button
+								type="button"
+								class="btn btn--green btn--deny fw-bold mr-3 deny"
+								id="btnDenyCookie"
+								data-bs-dismiss="toast"
+							>
+								Denegar
+							</button>
+							<button
+								type="button"
+								class="btn btn--green fw-bold"
+								id="btnAcceptCookie"
+								data-bs-dismiss="toast"
+							>
+								Aceptar
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+    document.body.insertAdjacentHTML("afterbegin", toast);
+
+    // Busca la capa donde tenemos el toast y se le añade un manejador de eventos sobre 'hidden.bs.toast'
+    // Con eso se captura un evento propio de Bootstrap que se ha generado manualmente por código
+    // Cuando se cierra, se ejecuta el evento y se borra del DOM
+    const cookiesMessage = document.getElementById("cookies-message");
+    cookiesMessage.addEventListener("hidden.bs.toast", (event) => {
+      // Coge y elimina el padre donde está ejecutándose el evento
+      event.currentTarget.parentElement.remove();
+    });
+
+    const denyCookieFunction = (event) => {
+      this.initzone.replaceChildren();
+      this.initzone.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="container my-3">
+					<div class="alert alert-warning" role="alert">
+						<strong>
+							Para utilizar esta web es necesario aceptar el uso de cookies.
+							Debe recargar la página y aceptar las condicones para seguir
+							navegando. Gracias.
+						</strong>
+					</div>
+				</div>`
+      );
+      this.centralzone.remove();
+      this.menu.remove();
+    };
+
+    const btnDenyCookie = document.getElementById("btnDenyCookie");
+    btnDenyCookie.addEventListener("click", denyCookieFunction);
+    const btnDismissCookie = document.getElementById("btnDismissCookie");
+    btnDismissCookie.addEventListener("click", denyCookieFunction);
+
+    const btnAcceptCookie = document.getElementById("btnAcceptCookie");
+    btnAcceptCookie.addEventListener("click", (event) => {
+      setCookie("acceptedCookieMessage", "true", 1);
     });
   }
 
