@@ -1330,7 +1330,7 @@ class RestaurantsManagerView {
     userArea.insertAdjacentHTML(
       "afterbegin",
       `<div class="fst-italic text--green fw-normal">Bienvenido, <span class="fw-bold"><u>${user.username}</u></span> <br>
-      <a id="aCloseSession" href="#" class="text--green fw-bold">Cerrar sesión</a>
+      <a id="aCloseSession" href="#" class="text--green fw-bold">Desconectar</a>
     </div>`
     );
   }
@@ -1359,6 +1359,7 @@ class RestaurantsManagerView {
     });
   }
 
+  // Manejador para cerrar la sesión del usuario
   bindCloseSession(handler) {
     document
       .getElementById("aCloseSession")
@@ -1368,20 +1369,24 @@ class RestaurantsManagerView {
       });
   }
 
+  // Reemplaza en el hisotry la acción de inicio
   initHistory() {
     history.replaceState({ action: "init" }, null);
   }
 
+  // Método para activar una cookie en el usuario
   setUserCookie(user) {
     setCookie("activeUser", user.username, 1);
   }
 
+  // Método para borrar la cookie de usuario
   deleteUserCookie() {
     setCookie("activeUser", "", 0);
   }
 
+  // Método que borra el enlace de administración
   removeAdminMenu() {
-    const adminMenu = document.getElementById("adminMenu");
+    const adminMenu = document.getElementById("navAdministration");
     if (adminMenu) adminMenu.parentElement.remove();
   }
 

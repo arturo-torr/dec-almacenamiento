@@ -270,6 +270,13 @@ class RestaurantsManagerController {
 
   // Funciones que solo se ejecutan una sola vez
   onLoad = () => {
+    this[LOAD_MANAGER_OBJECTS]();
+    this.onAddCategory();
+    this.onAddAllergen();
+    this.onAddMenu();
+    this.onAddRestaurant();
+    this.onAddClose();
+
     // Busca si hemos aceptado el mensaje de cookies, es decir, hay una cookie creada
     if (getCookie("acceptedCookieMessage") !== "true") {
       this[VIEW].showCookiesMessage();
@@ -283,18 +290,12 @@ class RestaurantsManagerController {
       // Asigna el usuario y abre una sesión con ese usuario
       if (user) {
         this[USER] = user;
+        console.log(user);
         this.onOpenSession();
       }
     } else {
       this.onCloseSession();
     }
-
-    this[LOAD_MANAGER_OBJECTS]();
-    this.onAddCategory();
-    this.onAddAllergen();
-    this.onAddMenu();
-    this.onAddRestaurant();
-    this.onAddClose();
   };
 
   // Funciones que se ejecutan al clickear inicio
@@ -339,6 +340,9 @@ class RestaurantsManagerController {
     this[VIEW].bindCloseWindowsInMenu(this.handleCloseWindowsInMenu);
   };
 
+  /** -------------- PRACTICA 8 ----------------- */
+
+  // Muestra las acciones necesarias si hay una sesión de usuario, mostrando el menú de administración
   onOpenSession() {
     this.onInit();
     this[VIEW].initHistory();
@@ -359,11 +363,21 @@ class RestaurantsManagerController {
     );
   }
 
-  /** -------------- PRACTICA 8 ----------------- */
+  // Muestra las acciones pertinentes al cerrar una sesión de usuario
+  onCloseSession() {
+    this[USER] = null;
+    this[VIEW].deleteUserCookie();
+    this[VIEW].showIdentificationLink();
+    this[VIEW].bindIdentificationLink(this.handleLoginForm);
+    this[VIEW].removeAdminMenu();
+  }
+
+  // Manejador para mostrar el formulario de login
   handleLoginForm = () => {
     this[VIEW].showLogin();
     this[VIEW].bindLogin(this.handleLogin);
   };
+
   // El argumento remember es para mantener la sesión si el usuario ha clickeado "Recuérdame"
   handleLogin = (username, password, remember) => {
     // Lo valida, y si es correcto, tendremos un objeto usuario
@@ -380,19 +394,12 @@ class RestaurantsManagerController {
     }
   };
 
+  // Manejador para el cerrado de sesión
   handleCloseSession = () => {
     this.onCloseSession();
     this.onInit();
     this[VIEW].initHistory();
   };
-
-  onCloseSession() {
-    this[USER] = null;
-    this[VIEW].deleteUserCookie();
-    this[VIEW].showIdentificationLink();
-    this[VIEW].bindIdentificationLink(this.handleLoginForm);
-    this[VIEW].removeAdminMenu();
-  }
 
   /** ----------------- FIN PRACTICA 8 -------------- */
 
