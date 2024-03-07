@@ -1264,6 +1264,128 @@ class RestaurantsManagerView {
       );
     }
   }
+
+  /** -------------- PRACTICA 8 ------------ */
+  // Crea una vista para el link de login en el menú
+  showIdentificationLink() {
+    const userArea = document.getElementById("userArea");
+    userArea.replaceChildren();
+    userArea.insertAdjacentHTML(
+      "afterbegin",
+      `<div>
+        <a id="login" class="text--green mt-2" href="#"> Identificate </a>
+      </div>`
+    );
+  }
+
+  // Muestra el formulario de login en la zona central
+  showLogin() {
+    this.centralzone.replaceChildren();
+    const login = `<hr class="text--green mt-5">
+    <h1 class="text--green text-center">Formulario de login</h1>
+    <div class="container mb-5">
+    <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-center form_container">
+                <form name="fLogin" role="form" novalidate>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-regular fa-circle-user"></i></span>
+                        <input type="text" name="username" class="form-control" value="" placeholder="Introduzca su usuario">
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                        <input type="password" name="password" class="form-control input_pass" value="" placeholder="Introduzca su contraseña">
+                    </div>
+                    <div class="form-group">
+                            <input name="remember" type="checkbox" class="form-check-input"
+                                id="customControlInline">
+                            <label class="custom-control-label" for="customControlInline">Recuerdame</label>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn--green fw-bold" type="submit">Acceder</button>
+                    </div>
+                </form>
+            </div>
+    </div>
+</div>`;
+    this.centralzone.insertAdjacentHTML("afterbegin", login);
+  }
+
+  // Muestra un mensaje personalizado de error en el caso de que se introduzca incorrectamente un dato del formulario de login
+  showInvalidUserMessage() {
+    this.centralzone.insertAdjacentHTML(
+      "beforeend",
+      `<div class="container my-3"><div class="bg__grey p-5 text--green border--green rounded" role="alert">
+    <strong>El usuario y la contraseña no son válidos. Inténtelo
+    nuevamente.</strong>
+    </div>`
+    );
+    document.forms.fLogin.reset();
+    document.forms.fLogin.username.focus();
+  }
+
+  // Muestra en el menú un mensaje personalizado para el usuario con su nombre y un enlace que permite cerrar la sesión
+  showAuthUserProfile(user) {
+    const userArea = document.getElementById("userArea");
+    userArea.replaceChildren();
+    userArea.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="fst-italic text--green fw-normal">Bienvenido, <span class="fw-bold"><u>${user.username}</u></span> <br>
+      <a id="aCloseSession" href="#" class="text--green fw-bold">Cerrar sesión</a>
+    </div>`
+    );
+  }
+
+  // Manejador para el formulario de login
+  bindLogin(handler) {
+    const form = document.forms.fLogin;
+    form.addEventListener("submit", (event) => {
+      handler(form.username.value, form.password.value, form.remember.checked);
+      event.preventDefault();
+    });
+  }
+
+  // Bind para dotar de funcionalidad al link de login
+  bindIdentificationLink(handler) {
+    const login = document.getElementById("login");
+    login.addEventListener("click", (event) => {
+      this[EXECUTE_HANDLER](
+        handler,
+        [],
+        "main",
+        { action: "login" },
+        "#",
+        event
+      );
+    });
+  }
+
+  bindCloseSession(handler) {
+    document
+      .getElementById("aCloseSession")
+      .addEventListener("click", (event) => {
+        handler();
+        event.preventDefault();
+      });
+  }
+
+  initHistory() {
+    history.replaceState({ action: "init" }, null);
+  }
+
+  setUserCookie(user) {
+    setCookie("activeUser", user.username, 1);
+  }
+
+  deleteUserCookie() {
+    setCookie("activeUser", "", 0);
+  }
+
+  removeAdminMenu() {
+    const adminMenu = document.getElementById("adminMenu");
+    if (adminMenu) adminMenu.parentElement.remove();
+  }
+
+  /** -------------- FIN PRACTICA 8 -------------- */
   /** ----------- INICIO MODALES -----------  */
 
   // Modal que se abre cuando se crea un plato, indicando si se ha creado o no correctamente.
@@ -1647,8 +1769,6 @@ class RestaurantsManagerView {
 
   /** ------------------- MÉTODOS BIND ------------------- */
 
-  /** --- PRACTICA 7 --- */
-
   // Manejadores para todos los formularios que se encuentran en el menú de navegación
   bindAdminMenu(
     hNewDish,
@@ -1814,8 +1934,6 @@ class RestaurantsManagerView {
       });
     }
   }
-
-  /** --- FIN PRACTICA 7  **/
 
   // Modificado el método para poder invocar a [EXECUTE_HANDLER]()
   bindInit(handler) {

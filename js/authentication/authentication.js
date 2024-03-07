@@ -6,7 +6,6 @@ import {
   InvalidAccessConstructorException,
   EmptyValueException,
   InvalidValueException,
-  AbstractClassException,
 } from "../exceptions.js";
 
 import { User } from "../entities/user.js";

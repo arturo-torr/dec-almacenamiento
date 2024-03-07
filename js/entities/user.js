@@ -2,11 +2,8 @@
  * Clase de entidad para poder gestionar objetos de tipo usuario
  */
 import {
-  BaseException,
   InvalidAccessConstructorException,
   EmptyValueException,
-  InvalidValueException,
-  AbstractClassException,
 } from "../exceptions.js";
 
 class User {

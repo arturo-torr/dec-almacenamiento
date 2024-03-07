@@ -16,11 +16,16 @@ const MODEL = Symbol("RestaurantsManagerModel");
 const VIEW = Symbol("RestaurantsManagerView");
 // Se instanciarán aquí los objetos que nos hagan falta para una carga inicial de datos
 const LOAD_MANAGER_OBJECTS = Symbol("Load Manager Objects");
+// Symbol para autenticación y usuario
+const AUTH = Symbol("AUTH");
+const USER = Symbol("USER");
 
 class RestaurantsManagerController {
-  constructor(model, view) {
+  constructor(model, view, auth) {
     this[MODEL] = model;
     this[VIEW] = view;
+    this[AUTH] = auth;
+    this[USER] = null;
 
     this.onLoad();
     this.onInit();
@@ -270,22 +275,25 @@ class RestaurantsManagerController {
       this[VIEW].showCookiesMessage();
     }
 
+    // Recupera si hay un usuario que ha mantenido la sesión
+    const userCookie = getCookie("activeUser");
+    // Si existe, recibe el usuario
+    if (userCookie) {
+      const user = this[AUTH].getUser(userCookie);
+      // Asigna el usuario y abre una sesión con ese usuario
+      if (user) {
+        this[USER] = user;
+        this.onOpenSession();
+      }
+    } else {
+      this.onCloseSession();
+    }
+
     this[LOAD_MANAGER_OBJECTS]();
     this.onAddCategory();
     this.onAddAllergen();
     this.onAddMenu();
     this.onAddRestaurant();
-    this[VIEW].showAdminMenu();
-    this[VIEW].bindAdminMenu(
-      this.handleNewDishForm,
-      this.handleRemoveDishForm,
-      this.handleNewCategoryForm,
-      this.handleRemoveCategoryForm,
-      this.handleNewRestaurantForm,
-      this.handleUpdAssignForm,
-      this.handleUpdAllergenForm,
-      this.handleChangePositionsForm
-    );
     this.onAddClose();
   };
 
@@ -330,6 +338,63 @@ class RestaurantsManagerController {
     this[VIEW].showCloseWindowsInMenu();
     this[VIEW].bindCloseWindowsInMenu(this.handleCloseWindowsInMenu);
   };
+
+  onOpenSession() {
+    this.onInit();
+    this[VIEW].initHistory();
+    // Muestra el perfil de usuario
+    this[VIEW].showAuthUserProfile(this[USER]);
+    // Enlazador para cerrar la sesión
+    this[VIEW].bindCloseSession(this.handleCloseSession);
+    this[VIEW].showAdminMenu();
+    this[VIEW].bindAdminMenu(
+      this.handleNewDishForm,
+      this.handleRemoveDishForm,
+      this.handleNewCategoryForm,
+      this.handleRemoveCategoryForm,
+      this.handleNewRestaurantForm,
+      this.handleUpdAssignForm,
+      this.handleUpdAllergenForm,
+      this.handleChangePositionsForm
+    );
+  }
+
+  /** -------------- PRACTICA 8 ----------------- */
+  handleLoginForm = () => {
+    this[VIEW].showLogin();
+    this[VIEW].bindLogin(this.handleLogin);
+  };
+  // El argumento remember es para mantener la sesión si el usuario ha clickeado "Recuérdame"
+  handleLogin = (username, password, remember) => {
+    // Lo valida, y si es correcto, tendremos un objeto usuario
+    if (this[AUTH].validateUser(username, password)) {
+      // Lo guardamos para poder reutilizarlo cuando queramos
+      this[USER] = this[AUTH].getUser(username);
+      this.onOpenSession();
+      if (remember) {
+        this[VIEW].setUserCookie(this[USER]);
+      }
+      // SI no existe, mostramos un mensaje de que el usuario es incorrecto
+    } else {
+      this[VIEW].showInvalidUserMessage();
+    }
+  };
+
+  handleCloseSession = () => {
+    this.onCloseSession();
+    this.onInit();
+    this[VIEW].initHistory();
+  };
+
+  onCloseSession() {
+    this[USER] = null;
+    this[VIEW].deleteUserCookie();
+    this[VIEW].showIdentificationLink();
+    this[VIEW].bindIdentificationLink(this.handleLoginForm);
+    this[VIEW].removeAdminMenu();
+  }
+
+  /** ----------------- FIN PRACTICA 8 -------------- */
 
   // Manejador que permite cerrar la ventana y eliminarlo de las referencias guardadas
   handleCloseWindowsInMenu = (window, dish) => {
