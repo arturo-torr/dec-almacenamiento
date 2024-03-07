@@ -6,6 +6,8 @@ import {
   newUpdateAllergenValidation,
   newChangePositionsValidation,
 } from "./validation.js";
+
+import { setCookie } from "./utils.js";
 // Symbol dónde se introducirá la vista de RestaurantManager
 const EXECUTE_HANDLER = Symbol("executeHandler");
 
@@ -1262,6 +1264,133 @@ class RestaurantsManagerView {
       );
     }
   }
+
+  /** -------------- PRACTICA 8 ------------ */
+  // Crea una vista para el link de login en el menú
+  showIdentificationLink() {
+    const userArea = document.getElementById("userArea");
+    userArea.replaceChildren();
+    userArea.insertAdjacentHTML(
+      "afterbegin",
+      `<div>
+        <a id="login" class="text--green mt-2" href="#"> Identificate </a>
+      </div>`
+    );
+  }
+
+  // Muestra el formulario de login en la zona central
+  showLogin() {
+    this.centralzone.replaceChildren();
+    const login = `<hr class="text--green mt-5">
+    <h1 class="text--green text-center">Formulario de login</h1>
+    <div class="container mb-5">
+    <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-center form_container">
+                <form name="fLogin" role="form" novalidate>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-regular fa-circle-user"></i></span>
+                        <input type="text" name="username" class="form-control" value="" placeholder="Introduzca su usuario">
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                        <input type="password" name="password" class="form-control input_pass" value="" placeholder="Introduzca su contraseña">
+                    </div>
+                    <div class="form-group">
+                            <input name="remember" type="checkbox" class="form-check-input"
+                                id="customControlInline">
+                            <label class="custom-control-label" for="customControlInline">Recuerdame</label>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn--green fw-bold" type="submit">Acceder</button>
+                    </div>
+                </form>
+            </div>
+    </div>
+</div>`;
+    this.centralzone.insertAdjacentHTML("afterbegin", login);
+  }
+
+  // Muestra un mensaje personalizado de error en el caso de que se introduzca incorrectamente un dato del formulario de login
+  showInvalidUserMessage() {
+    this.centralzone.insertAdjacentHTML(
+      "beforeend",
+      `<div class="container my-3"><div class="bg__grey p-5 text--green border--green rounded" role="alert">
+    <strong>El usuario y la contraseña no son válidos. Inténtelo
+    nuevamente.</strong>
+    </div>`
+    );
+    document.forms.fLogin.reset();
+    document.forms.fLogin.username.focus();
+  }
+
+  // Muestra en el menú un mensaje personalizado para el usuario con su nombre y un enlace que permite cerrar la sesión
+  showAuthUserProfile(user) {
+    const userArea = document.getElementById("userArea");
+    userArea.replaceChildren();
+    userArea.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="fst-italic text--green fw-normal">Bienvenido, <span class="fw-bold"><u>${user.username}</u></span> <br>
+      <a id="aCloseSession" href="#" class="text--green fw-bold">Desconectar</a>
+    </div>`
+    );
+  }
+
+  // Manejador para el formulario de login
+  bindLogin(handler) {
+    const form = document.forms.fLogin;
+    form.addEventListener("submit", (event) => {
+      handler(form.username.value, form.password.value, form.remember.checked);
+      event.preventDefault();
+    });
+  }
+
+  // Bind para dotar de funcionalidad al link de login
+  bindIdentificationLink(handler) {
+    const login = document.getElementById("login");
+    login.addEventListener("click", (event) => {
+      this[EXECUTE_HANDLER](
+        handler,
+        [],
+        "main",
+        { action: "login" },
+        "#",
+        event
+      );
+    });
+  }
+
+  // Manejador para cerrar la sesión del usuario
+  bindCloseSession(handler) {
+    document
+      .getElementById("aCloseSession")
+      .addEventListener("click", (event) => {
+        handler();
+        event.preventDefault();
+      });
+  }
+
+  // Reemplaza en el hisotry la acción de inicio
+  initHistory() {
+    history.replaceState({ action: "init" }, null);
+  }
+
+  // Método para activar una cookie en el usuario
+  setUserCookie(user) {
+    setCookie("activeUser", user.username, 1);
+  }
+
+  // Método para borrar la cookie de usuario
+  deleteUserCookie() {
+    setCookie("activeUser", "", 0);
+  }
+
+  // Método que borra el enlace de administración
+  removeAdminMenu() {
+    const adminMenu = document.getElementById("navAdministration");
+    if (adminMenu) adminMenu.parentElement.remove();
+  }
+
+  /** -------------- FIN PRACTICA 8 -------------- */
   /** ----------- INICIO MODALES -----------  */
 
   // Modal que se abre cuando se crea un plato, indicando si se ha creado o no correctamente.
@@ -1554,11 +1683,96 @@ class RestaurantsManagerView {
     });
   }
 
+  showCookiesMessage() {
+    const toast = `<div class="fixed-top p-5 mt-5">
+				<div
+					id="cookies-message"
+					class="toast fade show bg__grey border--green1 text-white w-50 mx-auto mw-100"
+					role="alert"
+					aria-live="assertive"
+					aria-atomic="true"
+				>
+					<div class="toast-header bg__grey border_bottom--green1">
+						<h4 class="me-auto text--green fw-bold my-auto">Aviso de uso de cookies</h4>
+            <button
+							type="button"
+							class="btn-close bg-danger"
+							data-bs-dismiss="toast"
+							aria-label="Close"
+							id="btnDismissCookie"
+						></button>
+					</div>
+					<div class="toast-body p-4 d-flex flex-column">
+						<p>
+							Este sitio web almacena datos en cookies para activar su
+							funcionalidad, entre las que se encuentra datos analíticos y
+							personalización. Para poder utilizar este sitio, estás
+							automáticamente aceptando que utilizamos cookies.
+						</p>
+						<div class="ml-auto">
+							<button
+								type="button"
+								class="btn btn--green btn--deny fw-bold mr-3 deny"
+								id="btnDenyCookie"
+								data-bs-dismiss="toast"
+							>
+								Denegar
+							</button>
+							<button
+								type="button"
+								class="btn btn--green fw-bold"
+								id="btnAcceptCookie"
+								data-bs-dismiss="toast"
+							>
+								Aceptar
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>`;
+    document.body.insertAdjacentHTML("afterbegin", toast);
+
+    // Busca la capa donde tenemos el toast y se le añade un manejador de eventos sobre 'hidden.bs.toast'
+    // Con eso se captura un evento propio de Bootstrap que se ha generado manualmente por código
+    // Cuando se cierra, se ejecuta el evento y se borra del DOM
+    const cookiesMessage = document.getElementById("cookies-message");
+    cookiesMessage.addEventListener("hidden.bs.toast", (event) => {
+      // Coge y elimina el padre donde está ejecutándose el evento
+      event.currentTarget.parentElement.remove();
+    });
+
+    const denyCookieFunction = (event) => {
+      this.initzone.replaceChildren();
+      this.initzone.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="container my-3">
+					<div class="alert bg__grey text--green text-center m-20percent py-5" role="alert">
+						<strong>
+							Para utilizar esta web es necesario aceptar el uso de cookies.
+							Debe recargar la página y aceptar las condiciones para seguir
+							navegando. Gracias.
+						</strong>
+					</div>
+				</div>`
+      );
+      this.centralzone.remove();
+      this.menu.remove();
+    };
+
+    const btnDenyCookie = document.getElementById("btnDenyCookie");
+    btnDenyCookie.addEventListener("click", denyCookieFunction);
+    const btnDismissCookie = document.getElementById("btnDismissCookie");
+    btnDismissCookie.addEventListener("click", denyCookieFunction);
+
+    const btnAcceptCookie = document.getElementById("btnAcceptCookie");
+    btnAcceptCookie.addEventListener("click", (event) => {
+      setCookie("acceptedCookieMessage", "true", 1);
+    });
+  }
+
   /** ----------- FIN MODALES -----------  */
 
   /** ------------------- MÉTODOS BIND ------------------- */
-
-  /** --- PRACTICA 7 --- */
 
   // Manejadores para todos los formularios que se encuentran en el menú de navegación
   bindAdminMenu(
@@ -1725,8 +1939,6 @@ class RestaurantsManagerView {
       });
     }
   }
-
-  /** --- FIN PRACTICA 7  **/
 
   // Modificado el método para poder invocar a [EXECUTE_HANDLER]()
   bindInit(handler) {

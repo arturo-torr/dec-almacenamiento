@@ -35,4 +35,17 @@ class InvalidValueException extends BaseException {
   }
 }
 
-export { BaseException, EmptyValueException, InvalidValueException };
+// Excepción acceso inválido a constructor
+class InvalidAccessConstructorException extends BaseException {
+  constructor(fileName, lineNumber) {
+    super("Constructor can’t be called as a function.", fileName, lineNumber);
+    this.name = "InvalidAccessConstructorException";
+  }
+}
+
+export {
+  BaseException,
+  EmptyValueException,
+  InvalidValueException,
+  InvalidAccessConstructorException,
+};
