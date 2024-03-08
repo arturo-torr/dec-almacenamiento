@@ -19,6 +19,8 @@ const LOAD_MANAGER_OBJECTS = Symbol("Load Manager Objects");
 // Symbol para autenticación y usuario
 const AUTH = Symbol("AUTH");
 const USER = Symbol("USER");
+// Symbol que guarda los favoritos que ha dado un usuario
+const FAVS = Symbol("FAVS");
 
 class RestaurantsManagerController {
   constructor(model, view, auth) {
@@ -26,6 +28,7 @@ class RestaurantsManagerController {
     this[VIEW] = view;
     this[AUTH] = auth;
     this[USER] = null;
+    this[FAVS] = [];
 
     this.onLoad();
     this.onInit();
@@ -290,7 +293,6 @@ class RestaurantsManagerController {
       // Asigna el usuario y abre una sesión con ese usuario
       if (user) {
         this[USER] = user;
-        console.log(user);
         this.onOpenSession();
       }
     } else {
@@ -359,7 +361,8 @@ class RestaurantsManagerController {
       this.handleNewRestaurantForm,
       this.handleUpdAssignForm,
       this.handleUpdAllergenForm,
-      this.handleChangePositionsForm
+      this.handleChangePositionsForm,
+      this.handleQueryFavourites
     );
   }
 
@@ -399,6 +402,29 @@ class RestaurantsManagerController {
     this.onCloseSession();
     this.onInit();
     this[VIEW].initHistory();
+  };
+
+  // Manejador que permite añadir a localStorage los platos favoritos que selecciona un suuario
+  handleAddToFavorites = (dish) => {
+    let done;
+    let error;
+    if (!this[USER]) {
+      this[VIEW].showNeedsLoginModal();
+    } else {
+      dish = this[MODEL].createDish(dish, RestaurantsManager.Dish);
+      if (!this[FAVS].includes(dish)) {
+        this[FAVS].push(dish);
+        done = true;
+        localStorage.setItem("dishes", this[FAVS]);
+      } else {
+        done = false;
+      }
+      this[VIEW].showAddFavoritesModal(done, dish, error);
+    }
+  };
+
+  handleQueryFavourites = () => {
+    this[VIEW].showFavouritesDishes(this[FAVS], this[USER]);
   };
 
   /** ----------------- FIN PRACTICA 8 -------------- */
@@ -471,6 +497,7 @@ class RestaurantsManagerController {
       const dish = this[MODEL].createDish(name, RestaurantsManager.Dish);
       this[VIEW].showDish(dish);
       this[VIEW].bindShowProductInNewWindow(this.handleShowDishInNewWindow);
+      this[VIEW].bindAddToFavorites(this.handleAddToFavorites);
     } catch (error) {
       this[VIEW].showDish(
         null,

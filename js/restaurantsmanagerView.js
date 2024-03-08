@@ -120,7 +120,7 @@ class RestaurantsManagerView {
     for (const category of categories) {
       container.insertAdjacentHTML(
         "beforeend",
-        `<li><a data-category="${category.category.name}" class="dropdown-item fw-bold" href="#dish-list">${category.category.name}</a></li>`
+        `<li class="hover-menu"><a data-category="${category.category.name}" class="dropdown-item fw-bold" href="#dish-list">${category.category.name}</a></li>`
       );
     }
   }
@@ -215,7 +215,7 @@ class RestaurantsManagerView {
     for (const rest of restaurants) {
       container.insertAdjacentHTML(
         "beforeend",
-        `<li><a data-rest="${rest.restaurant.name}" class="dropdown-item fw-bold" href="#restaurant">${rest.restaurant.name}</a></li>`
+        `<li class="hover-menu"><a data-rest="${rest.restaurant.name}" class="dropdown-item fw-bold" href="#restaurant">${rest.restaurant.name}</a></li>`
       );
     }
   }
@@ -402,11 +402,11 @@ class RestaurantsManagerView {
                       <p class="text--green">${dish.description}</p>
                     </div>
                     <div class="cart mt-4 align-items-center">
-                      <button
+                      <button id="b-favorites"
                         data-dish="${dish.name}"
                         class="newfood__content__button text-uppercase mr-2 px-4"
                       >
-                        Descubrir ahora
+                        Añadir a favoritos
                       </button>
                <button id="b-open"
                         data-dish="${dish.name}"
@@ -430,6 +430,16 @@ class RestaurantsManagerView {
       );
     }
     this.centralzone.append(container);
+  }
+
+  // Enlaza con el controlador para mandarle el plato favorito seleccionado
+  bindAddToFavorites(handler) {
+    // Coge el menú para cerrar las ventanas
+    const bFav = document.getElementById("b-favorites");
+    // Cuando se haga click, se cierran aquellas que estén abiertas
+    bFav.addEventListener("click", function (event) {
+      handler(this.dataset.dish);
+    });
   }
 
   // Función a la que pasamos un plato y la nueva ventana para mostrarlas
@@ -550,7 +560,7 @@ class RestaurantsManagerView {
           role="button"
           data-bs-toggle="dropdown"
           aria-expanded="false">
-          Administración
+          KAB Administración
         </a>`
     );
 
@@ -588,6 +598,10 @@ class RestaurantsManagerView {
     subContainer.insertAdjacentHTML(
       "beforeend",
       '<a id="newRestaurant" class="dropdown-item text--green fw-bold" href="#new-restaurant">Crear restaurante</a>'
+    );
+    subContainer.insertAdjacentHTML(
+      "beforeend",
+      '<li><hr class="dropdown-divider border--green1"></li><a id="queryFavourites" class="dropdown-item text--green fw-bold" href="#query-favourites">Consultar favoritos</a>'
     );
 
     div.append(subContainer);
@@ -1390,6 +1404,52 @@ class RestaurantsManagerView {
     if (adminMenu) adminMenu.parentElement.remove();
   }
 
+  // Función que vista todos los platos con un botón, permitiendo su posterior eliminación
+  showFavouritesDishes(dishes, user) {
+    // Realizamos la creación de las migas de pan, eliminando el atributo de aria-current al último elemento y también la fuente bold
+    let ol = this.breadcrumb.closest("ol");
+    ol.lastElementChild.removeAttribute("aria-current");
+    ol.lastElementChild.classList.remove("fw-bolder");
+    // Creamos un elemento con el nombre del plato y lo agrega a las migas de pan
+    let li = document.createElement("li");
+    li.classList.add("breadcrumb-item", "text--green", "fw-bolder");
+    li.textContent = "Consultar favoritos";
+    ol.appendChild(li);
+
+    this.centralzone.replaceChildren();
+    this.initzone.replaceChildren();
+
+    const container = document.createElement("div");
+    container.classList.add("container", "my-3");
+    container.id = "remove-dish";
+    container.insertAdjacentHTML(
+      "afterbegin",
+      `<h1 class="display-5 text--green mt-5">Platos favoritos de <u>${user.username}</u></h1>`
+    );
+
+    const row = document.createElement("div");
+    row.classList.add("row");
+
+    for (const dish of dishes) {
+      row.insertAdjacentHTML(
+        "beforeend",
+        `<div class="col-lg-3 col-md-6 my-3">
+          <a data-dish="${dish.name}" href="#dish-list" class="text--green">
+            <div>
+              <img alt="${dish.name}" src="${dish.image}" class="img-fluid" />
+            </div>
+            <div>
+              <h3 class="text--green fw-bold mt-2">${dish.name}</h3>
+              <div class="text--green">${dish.description}</div>
+            </div>
+          </a>
+        </div>`
+      );
+    }
+    container.append(row);
+    this.centralzone.append(container);
+  }
+
   /** -------------- FIN PRACTICA 8 -------------- */
   /** ----------- INICIO MODALES -----------  */
 
@@ -1770,6 +1830,45 @@ class RestaurantsManagerView {
     });
   }
 
+  // Modal que se abre cuando se realiza el intento de añadir un plato como favorito
+  showAddFavoritesModal(done, dish, error) {
+    const messageModalContainer = document.getElementById("messageModal");
+    const messageModal = new bootstrap.Modal("#messageModal");
+    const title = document.getElementById("messageModalTitle");
+    title.innerHTML = "Añadido a favoritos";
+    const body = messageModalContainer.querySelector(".modal-body");
+    body.replaceChildren();
+    if (done) {
+      body.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="p-3">El plato
+      <strong>${dish.name}</strong> ha sido añadido a favoritos correctamente.</div>`
+      );
+    } else {
+      body.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> El plato <strong>${dish.name}</strong> ya está añadido a favoritos</div>`
+      );
+    }
+    messageModal.show();
+  }
+
+  // Modal que se abre cuando se realiza el intento de añadir un plato como favorito
+  showNeedsLoginModal() {
+    const messageModalContainer = document.getElementById("messageModal");
+    const messageModal = new bootstrap.Modal("#messageModal");
+    const title = document.getElementById("messageModalTitle");
+    title.innerHTML = "Error de login";
+    const body = messageModalContainer.querySelector(".modal-body");
+    body.replaceChildren();
+
+    body.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> Debe realizar login para poder añadir platos a favoritos.</div>`
+    );
+    messageModal.show();
+  }
+
   /** ----------- FIN MODALES -----------  */
 
   /** ------------------- MÉTODOS BIND ------------------- */
@@ -1783,7 +1882,8 @@ class RestaurantsManagerView {
     hNewRest,
     hUpdAssign,
     hUpdAllergen,
-    hChangePositions
+    hChangePositions,
+    hQueryFavourites
   ) {
     const newDishLink = document.getElementById("newDish");
     newDishLink.addEventListener("click", (event) => {
@@ -1872,6 +1972,17 @@ class RestaurantsManagerView {
         [],
         "#change-positions",
         { action: "changePositions" },
+        "#",
+        event
+      );
+    });
+    const queryFavouritesLink = document.getElementById("queryFavourites");
+    queryFavouritesLink.addEventListener("click", (event) => {
+      this[EXECUTE_HANDLER](
+        hQueryFavourites,
+        [],
+        "#query-favourites",
+        { action: "queryFavourites" },
         "#",
         event
       );
