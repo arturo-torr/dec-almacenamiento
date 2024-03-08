@@ -402,11 +402,11 @@ class RestaurantsManagerView {
                       <p class="text--green">${dish.description}</p>
                     </div>
                     <div class="cart mt-4 align-items-center">
-                      <button
+                      <button id="b-favorites"
                         data-dish="${dish.name}"
                         class="newfood__content__button text-uppercase mr-2 px-4"
                       >
-                        Descubrir ahora
+                        Añadir a favoritos
                       </button>
                <button id="b-open"
                         data-dish="${dish.name}"
@@ -430,6 +430,16 @@ class RestaurantsManagerView {
       );
     }
     this.centralzone.append(container);
+  }
+
+  // Enlaza con el controlador para mandarle el plato favorito seleccionado
+  bindAddToFavorites(handler) {
+    // Coge el menú para cerrar las ventanas
+    const bFav = document.getElementById("b-favorites");
+    // Cuando se haga click, se cierran aquellas que estén abiertas
+    bFav.addEventListener("click", function (event) {
+      handler(this.dataset.dish);
+    });
   }
 
   // Función a la que pasamos un plato y la nueva ventana para mostrarlas
@@ -1768,6 +1778,45 @@ class RestaurantsManagerView {
     btnAcceptCookie.addEventListener("click", (event) => {
       setCookie("acceptedCookieMessage", "true", 1);
     });
+  }
+
+  // Modal que se abre cuando se realiza el intento de añadir un plato como favorito
+  showAddFavoritesModal(done, dish, error) {
+    const messageModalContainer = document.getElementById("messageModal");
+    const messageModal = new bootstrap.Modal("#messageModal");
+    const title = document.getElementById("messageModalTitle");
+    title.innerHTML = "Añadido a favoritos";
+    const body = messageModalContainer.querySelector(".modal-body");
+    body.replaceChildren();
+    if (done) {
+      body.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="p-3">El plato
+      <strong>${dish}</strong> ha sido añadido a favoritos correctamente.</div>`
+      );
+    } else {
+      body.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> El plato <strong>${dish}</strong> ya está añadido a favoritos</div>`
+      );
+    }
+    messageModal.show();
+  }
+
+  // Modal que se abre cuando se realiza el intento de añadir un plato como favorito
+  showNeedsLoginModal() {
+    const messageModalContainer = document.getElementById("messageModal");
+    const messageModal = new bootstrap.Modal("#messageModal");
+    const title = document.getElementById("messageModalTitle");
+    title.innerHTML = "Error de login";
+    const body = messageModalContainer.querySelector(".modal-body");
+    body.replaceChildren();
+
+    body.insertAdjacentHTML(
+      "afterbegin",
+      `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> Debe realizar login para poder añadir platos a favoritos.</div>`
+    );
+    messageModal.show();
   }
 
   /** ----------- FIN MODALES -----------  */
