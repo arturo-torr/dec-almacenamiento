@@ -120,7 +120,7 @@ class RestaurantsManagerView {
     for (const category of categories) {
       container.insertAdjacentHTML(
         "beforeend",
-        `<li><a data-category="${category.category.name}" class="dropdown-item fw-bold" href="#dish-list">${category.category.name}</a></li>`
+        `<li class="hover-menu"><a data-category="${category.category.name}" class="dropdown-item fw-bold" href="#dish-list">${category.category.name}</a></li>`
       );
     }
   }
@@ -215,7 +215,7 @@ class RestaurantsManagerView {
     for (const rest of restaurants) {
       container.insertAdjacentHTML(
         "beforeend",
-        `<li><a data-rest="${rest.restaurant.name}" class="dropdown-item fw-bold" href="#restaurant">${rest.restaurant.name}</a></li>`
+        `<li class="hover-menu"><a data-rest="${rest.restaurant.name}" class="dropdown-item fw-bold" href="#restaurant">${rest.restaurant.name}</a></li>`
       );
     }
   }
