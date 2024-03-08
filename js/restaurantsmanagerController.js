@@ -293,7 +293,6 @@ class RestaurantsManagerController {
       // Asigna el usuario y abre una sesión con ese usuario
       if (user) {
         this[USER] = user;
-        console.log(user);
         this.onOpenSession();
       }
     } else {
@@ -362,7 +361,8 @@ class RestaurantsManagerController {
       this.handleNewRestaurantForm,
       this.handleUpdAssignForm,
       this.handleUpdAllergenForm,
-      this.handleChangePositionsForm
+      this.handleChangePositionsForm,
+      this.handleQueryFavourites
     );
   }
 
@@ -411,6 +411,7 @@ class RestaurantsManagerController {
     if (!this[USER]) {
       this[VIEW].showNeedsLoginModal();
     } else {
+      dish = this[MODEL].createDish(dish, RestaurantsManager.Dish);
       if (!this[FAVS].includes(dish)) {
         this[FAVS].push(dish);
         done = true;
@@ -420,6 +421,10 @@ class RestaurantsManagerController {
       }
       this[VIEW].showAddFavoritesModal(done, dish, error);
     }
+  };
+
+  handleQueryFavourites = () => {
+    this[VIEW].showFavouritesDishes(this[FAVS], this[USER]);
   };
 
   /** ----------------- FIN PRACTICA 8 -------------- */

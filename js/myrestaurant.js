@@ -26,6 +26,7 @@ const historyActions = {
   updAllergen: () => RestaurantManagerApp.handleUpdAllergenForm(),
   changePositions: () => RestaurantManagerApp.handleChangePositionsForm(),
   login: () => RestaurantManagerApp.handleLoginForm(),
+  queryFavourites: () => RestaurantManagerApp.handleQueryFavourites(),
 };
 
 // Se define 'popstate' para restaurar el estado de la página en función del tipo de acción apilada

@@ -560,7 +560,7 @@ class RestaurantsManagerView {
           role="button"
           data-bs-toggle="dropdown"
           aria-expanded="false">
-          Administración
+          KAB Administración
         </a>`
     );
 
@@ -598,6 +598,10 @@ class RestaurantsManagerView {
     subContainer.insertAdjacentHTML(
       "beforeend",
       '<a id="newRestaurant" class="dropdown-item text--green fw-bold" href="#new-restaurant">Crear restaurante</a>'
+    );
+    subContainer.insertAdjacentHTML(
+      "beforeend",
+      '<li><hr class="dropdown-divider border--green1"></li><a id="queryFavourites" class="dropdown-item text--green fw-bold" href="#query-favourites">Consultar favoritos</a>'
     );
 
     div.append(subContainer);
@@ -1400,6 +1404,52 @@ class RestaurantsManagerView {
     if (adminMenu) adminMenu.parentElement.remove();
   }
 
+  // Función que vista todos los platos con un botón, permitiendo su posterior eliminación
+  showFavouritesDishes(dishes, user) {
+    // Realizamos la creación de las migas de pan, eliminando el atributo de aria-current al último elemento y también la fuente bold
+    let ol = this.breadcrumb.closest("ol");
+    ol.lastElementChild.removeAttribute("aria-current");
+    ol.lastElementChild.classList.remove("fw-bolder");
+    // Creamos un elemento con el nombre del plato y lo agrega a las migas de pan
+    let li = document.createElement("li");
+    li.classList.add("breadcrumb-item", "text--green", "fw-bolder");
+    li.textContent = "Consultar favoritos";
+    ol.appendChild(li);
+
+    this.centralzone.replaceChildren();
+    this.initzone.replaceChildren();
+
+    const container = document.createElement("div");
+    container.classList.add("container", "my-3");
+    container.id = "remove-dish";
+    container.insertAdjacentHTML(
+      "afterbegin",
+      `<h1 class="display-5 text--green mt-5">Platos favoritos de <u>${user.username}</u></h1>`
+    );
+
+    const row = document.createElement("div");
+    row.classList.add("row");
+
+    for (const dish of dishes) {
+      row.insertAdjacentHTML(
+        "beforeend",
+        `<div class="col-lg-3 col-md-6 my-3">
+          <a data-dish="${dish.name}" href="#dish-list" class="text--green">
+            <div>
+              <img alt="${dish.name}" src="${dish.image}" class="img-fluid" />
+            </div>
+            <div>
+              <h3 class="text--green fw-bold mt-2">${dish.name}</h3>
+              <div class="text--green">${dish.description}</div>
+            </div>
+          </a>
+        </div>`
+      );
+    }
+    container.append(row);
+    this.centralzone.append(container);
+  }
+
   /** -------------- FIN PRACTICA 8 -------------- */
   /** ----------- INICIO MODALES -----------  */
 
@@ -1792,12 +1842,12 @@ class RestaurantsManagerView {
       body.insertAdjacentHTML(
         "afterbegin",
         `<div class="p-3">El plato
-      <strong>${dish}</strong> ha sido añadido a favoritos correctamente.</div>`
+      <strong>${dish.name}</strong> ha sido añadido a favoritos correctamente.</div>`
       );
     } else {
       body.insertAdjacentHTML(
         "afterbegin",
-        `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> El plato <strong>${dish}</strong> ya está añadido a favoritos</div>`
+        `<div class="error text-danger p-3"><i class="fa-solid fa-triangle-exclamation"></i> El plato <strong>${dish.name}</strong> ya está añadido a favoritos</div>`
       );
     }
     messageModal.show();
@@ -1832,7 +1882,8 @@ class RestaurantsManagerView {
     hNewRest,
     hUpdAssign,
     hUpdAllergen,
-    hChangePositions
+    hChangePositions,
+    hQueryFavourites
   ) {
     const newDishLink = document.getElementById("newDish");
     newDishLink.addEventListener("click", (event) => {
@@ -1921,6 +1972,17 @@ class RestaurantsManagerView {
         [],
         "#change-positions",
         { action: "changePositions" },
+        "#",
+        event
+      );
+    });
+    const queryFavouritesLink = document.getElementById("queryFavourites");
+    queryFavouritesLink.addEventListener("click", (event) => {
+      this[EXECUTE_HANDLER](
+        hQueryFavourites,
+        [],
+        "#query-favourites",
+        { action: "queryFavourites" },
         "#",
         event
       );
